@@ -22,9 +22,9 @@ version='1.0.0'
 argv0=${0##*/}
 
 image_name='templates/docker'
-image_tag='latest'
+image_tag='bullseye-slim'
 
-base_image_handle="alpine:${image_tag}"
+base_image_handle="debian:${image_tag}"
 
 arg_user_name='user'
 arg_work_dir='work'
@@ -135,6 +135,7 @@ docker_run() {
 
   docker run \
     -it \
+    --rm \
     --mount "type=volume,source=${volume_name},destination=${volume_target}" \
     --name $container_name \
     --network $network \

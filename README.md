@@ -2,9 +2,9 @@
 
 Shell script to automate Docker tasks with Dockerfile templates.
 
-- Alpine Linux base image
-- Rootless containers
-- Mount volumes for non-system user `$HOME` directory
+Features:
+- Rootless containers.
+- Mount volume `$HOME` directory for non-root user.
 
 See usage:
 ```console

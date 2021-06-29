@@ -7,18 +7,17 @@ FROM "${base_image_handle}"
 ARG user_name
 ARG work_dir
 
-ARG user_id='1000'
-ARG group_id='1000'
 ARG group_name="${user_name}"
+ARG group_id='1000'
+ARG user_id='1000'
 
 # Update package repositories and install new packages
-RUN apt-get update \
-      && apt-get install \
-      --assume-yes \
-      --no-install-recommends \
-      --quiet \
+RUN apk add \
+      --no-cache \
+      --update \
+      bash \
       git \
-      && rm -rf /var/lib/apt/lists/*
+      openssh
 
 # Set up a non-root user
 RUN addgroup \
