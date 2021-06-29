@@ -7,10 +7,6 @@ FROM "${base_image_handle}"
 ARG user_name
 ARG work_dir
 
-ARG user_id='1000'
-ARG group_id='1000'
-ARG group_name="${user_name}"
-
 # Update package repositories and install new packages
 RUN apt-get update \
       && apt-get install \
@@ -21,13 +17,10 @@ RUN apt-get update \
       && rm -rf /var/lib/apt/lists/*
 
 # Set up a non-root user
-RUN addgroup \
-      --gid "${group_id}" \
-      "${group_name}" \
-      && adduser \
-      --uid "${user_id}" \
-      --disabled-password \
-      --ingroup "${group_name}" \
+RUN useradd \
+      --create-home \
+      --shell '/bin/bash' \
+      --user-group \
       "${user_name}"
 
 # Set user environment variables
