@@ -18,13 +18,11 @@ set -o pipefail     # don't hide errors within pipes
 # Variables
 #===============================================================================
 
-version='1.0.0'
+version='1.1.0'
 argv0=${0##*/}
 
 image_name='templates/docker'
-image_tag='bullseye-slim'
-
-base_image_handle="debian:${image_tag}"
+image_tag_default='latest'
 
 arg_user_name='user'
 arg_work_dir='work'
@@ -36,15 +34,10 @@ environment_local='local'
 environment_dev='dev'
 environment_prod='prod'
 
-environment=$environment_local
+environment_default=$environment_local
 
 # Registries
 registry_uri='example-registry.com'
-
-# Constructs
-image_handle="${image_name}:${image_tag}"
-container_name=$(handle=${image_name}_${image_tag} \
-  && printf '%s' "${handle//[\/:]/-}")
 
 #===============================================================================
 # Usage
@@ -62,8 +55,10 @@ usage() {
     -v, --version             Show program version and exit.
     -e, --environment string  Specify value for Docker image development environment.
                               Available values: local | dev | prod.
-                              Defaults to local when no value is provided.
+                              Defaults to 'local' when no value is provided.
                               Dockerfile.<environment> file is used for Docker builds.
+    -t, --tag string          Specify image tag for Docker commands.
+                              Defaults to 'latest' when value not provided.
 
   Commands:
     build   Build Docker image.
@@ -95,15 +90,15 @@ get_project_root_dir() {
 }
 
 docker_build() {
-  local environment="${1}"
+  local image_tag="${1}"
+  local environment="${2}"
+  local dockerfile="${3:-'Dockerfile'}"
 
   local project_root_dir=$(get_project_root_dir)
-  local dockerfile="${project_root_dir}/Dockerfile.${environment}"
-  local image_handle="${image_handle}-${environment}"
+  local image_handle="${image_name}:${image_tag}-${environment}"
 
   docker build \
-    --file $dockerfile \
-    --build-arg base_image_handle=$base_image_handle \
+    --file "${project_root_dir}/${dockerfile}" \
     --build-arg user_name=$arg_user_name \
     --build-arg work_dir=$arg_work_dir \
     --tag $image_handle \
@@ -111,10 +106,11 @@ docker_build() {
   }
 
 docker_push() {
-  local environment="${1}"
+  local image_tag="${1}"
+  local environment="${2}"
 
   local registry_uri=$registry_uri
-  local image_handle="${image_handle}-${environment}"
+  local image_handle="${image_name}:${image_tag}-${environment}"
 
   docker image tag \
     $image_handle "${registry_uri}/${image_handle}" \
@@ -122,20 +118,21 @@ docker_push() {
   }
 
 docker_run() {
-  local environment="${1}"
+  local image_tag="${1}"
+  local environment="${2}"
 
   local volume_name="${image_name//[\/:]/-}"
   local volume_target="/home/${arg_user_name}"
 
-  local image_handle="${image_handle}-${environment}"
-  local container_name="${container_name}-${environment}"
+  local image_handle="${image_name}:${image_tag}-${environment}"
+  container_name=$(handle=${image_name}_${image_tag}-${environment} \
+    && printf '%s' "${handle//[\/:]/-}")
 
   docker network inspect $network &> /dev/null \
     || die "Network $network not found. Run '$ docker network create $network'."
 
   docker run \
     -it \
-    --rm \
     --mount "type=volume,source=${volume_name},destination=${volume_target}" \
     --name $container_name \
     --network $network \
@@ -173,17 +170,40 @@ while test $# -gt 0 ; do
       shift
       test $# -eq 0 && die "Missing the command argument."
       ;;
+    -t | --tag )
+      shift
+      test $# -eq 0 && die "Missing the tag option value."
+      image_tag="${1:-}"
+      shift
+      ;;
 
     build)
-      docker_build ${environment}
+      image_tag="${image_tag:-$image_tag_default}"
+      environment="${environment:-$environment_default}"
+      dockerfile="Dockerfile.${environment}"
+
+      docker_build \
+        $image_tag \
+        $environment \
+        $dockerfile
       break
       ;;
     push)
-      docker_push ${environment}
+      image_tag="${image_tag:-$image_tag_default}"
+      environment="${environment:-$environment_default}"
+
+      docker_push \
+        $image_tag \
+        $environment
       break
       ;;
     run)
-      docker_run ${environment}
+      image_tag="${image_tag:-$image_tag_default}"
+      environment="${environment:-$environment_default}"
+
+      docker_run \
+        $image_tag \
+        $environment
       break
       ;;
 

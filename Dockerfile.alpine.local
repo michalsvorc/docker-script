@@ -1,7 +1,5 @@
 # Base image
-ARG base_image_handle
-
-FROM "${base_image_handle}"
+FROM alpine:3.14
 
 # Build arguments
 ARG user_name

@@ -1,7 +1,5 @@
 # Base image
-ARG base_image_handle
-
-FROM "${base_image_handle}"
+FROM debian:bullseye-slim
 
 # Build arguments
 ARG user_name
