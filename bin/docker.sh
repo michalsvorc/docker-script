@@ -129,7 +129,7 @@ docker_run() {
     && printf '%s' "${handle//[\/:]/-}")
 
   docker network inspect $network &> /dev/null \
-    || die "Network \"$network\" not found. Run \"docker network create $network\""
+    || die "Network \"$network\" not found. Run \"docker network create $network\"."
 
   docker run \
     -it \
