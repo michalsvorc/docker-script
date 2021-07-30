@@ -1,18 +1,21 @@
 #!/usr/bin/env sh
+#===============================================================================
+# Shell script to automate Docker tasks.
 #
 # Author: Michal Svorc <dev@michalsvorc.com>
 # Dependencies: docker, git
 # Refer to the usage() function below for usage.
 # This program is under MIT license (https://opensource.org/licenses/MIT).
+#===============================================================================
 
 #===============================================================================
 # Abort the script on errors and undbound variables
 #===============================================================================
 
-set -o errexit      # abort on nonzero exit status
-set -o nounset      # abort on unbound variable
-set -o pipefail     # don't hide errors within pipes
-# set -o xtrace       # debugging
+set -o errexit      # Abort on nonzero exit status.
+set -o nounset      # Abort on unbound variable.
+set -o pipefail     # Don't hide errors within pipes.
+# set -o xtrace       # Set debugging.
 
 #===============================================================================
 # Variables
@@ -29,14 +32,14 @@ arg_work_dir='work'
 
 network='bridge'
 
-# Environments
+## Environments
 environment_local='local'
 environment_dev='dev'
 environment_prod='prod'
 
 environment_default=$environment_local
 
-# Registries
+## Registries
 registry_uri='example-registry.com'
 
 #===============================================================================
