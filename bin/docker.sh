@@ -30,16 +30,17 @@ image_tag_default='latest'
 arg_user_name='user'
 arg_work_dir='work'
 
-network='bridge'
-
-## Environments
+# Environments
 environment_local='local'
 environment_dev='dev'
 environment_prod='prod'
 
 environment_default=$environment_local
 
-## Registries
+# Network
+network='bridge'
+
+# Registries
 registry_uri='example-registry.com'
 
 #===============================================================================
