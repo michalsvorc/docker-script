@@ -1,17 +1,26 @@
-# Docker script
-
-Shell script to automate Docker tasks with Dockerfile templates.
+# Dockerfile templates
 
 Features:
 - Rootless containers.
 - Mount volume `$HOME` directory for non-root user.
+- User-defined network bridge.
 
-See usage:
+## Requirements
+
+Git repository must be initialized in project root directory for Docker shell
+script to work correctly.
+
+## Docker shell script
+
+Shell script to automate Docker tasks.
+
+### Usage
+
 ```console
 $ ./bin/docker.sh --help
 ```
 
-## Requirements
+### Variables
 
-Git repository must be initialized in project root directory for Docker script to work correctly.
+Edit "Variables" section to customize shell defaults.
 
