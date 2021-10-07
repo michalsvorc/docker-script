@@ -41,4 +41,4 @@ RUN mkdir "${HOME}/${work_dir}"
 WORKDIR "${HOME}/${work_dir}"
 
 # Runtime entrypoint
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/bin/bash", "--login"]
