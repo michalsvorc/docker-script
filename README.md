@@ -3,12 +3,10 @@
 Features:
 - Rootless containers.
 - Mount volume `$HOME` directory for non-root user.
-- User-defined network bridge.
 
 ## Requirements
 
-Git repository must be initialized in project root directory for Docker shell
-script to work correctly.
+Project root directory must contain `.git` repository for Docker shell script to work correctly.
 
 ## Docker shell script
 
