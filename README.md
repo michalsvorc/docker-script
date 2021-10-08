@@ -2,7 +2,7 @@
 
 Features:
 - Rootless containers.
-- Mount volume `$HOME` directory for non-root user.
+- Mount volume for non-root user workdir path.
 
 ## Requirements
 
