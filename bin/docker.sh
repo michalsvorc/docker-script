@@ -21,7 +21,7 @@ set -o pipefail     # Don't hide errors within pipes.
 # Variables
 #===============================================================================
 
-version='1.2.0'
+version='1.2.1'
 argv0=${0##*/}
 
 image_name='templates/docker'
@@ -100,6 +100,8 @@ docker_build() {
   local project_root_dir=$(get_project_root_dir)
   local image_handle="${image_name}:${image_tag}-${environment}"
 
+  printf 'Building image %s\n' $image_handle
+
   docker build \
     --file "${project_root_dir}/${dockerfile}" \
     --build-arg user_name=$user_name \
@@ -115,6 +117,8 @@ docker_push() {
   local registry_uri=$registry_uri
   local image_handle="${image_name}:${image_tag}-${environment}"
 
+  printf 'Pushing image %s to registry %s\n' $image_handle $registry_uri
+
   docker image tag \
     $image_handle "${registry_uri}/${image_handle}" \
     && docker push $_
@@ -128,11 +132,15 @@ docker_run() {
   local volume_target="/home/${user_name}/${work_dir}"
 
   local image_handle="${image_name}:${image_tag}-${environment}"
-  container_name=$(handle=${image_name}_${image_tag}-${environment} \
+  container_name=$(handle=${image_name}-${image_tag}-${environment} \
     && printf '%s' ${handle//[\/:]/-})
 
   docker network inspect $network &> /dev/null \
     || die "Network '${network}' not found. Run 'docker network create ${network}'."
+
+  printf 'Creating container %s based on image %s\n' \
+    $container_name \
+    $image_handle
 
   docker run \
     -it \
