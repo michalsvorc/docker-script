@@ -14,7 +14,7 @@ Dockerfile templates are located in `./dockerfiles` directory. Dockerfiles have 
 
 Copy selected Dockerfile into project root directory and rename it to `Dockerfile.local`.
 
-You can create separate Dockerfiles for different environments, based on variables defined in Docker shell script.
+You can create separate Dockerfiles for different environments specified by Docker shell script.
 
 Examples: `Dockerfile.dev`, `Dockerfile.prod`
 
