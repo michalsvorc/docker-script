@@ -5,7 +5,7 @@
 # Dependencies: docker, git
 
 #===============================================================================
-# Abort the script on errors and undbound variables
+# Abort the script on errors and unbound variables
 #===============================================================================
 
 set -o errexit      # Abort on nonzero exit status.
