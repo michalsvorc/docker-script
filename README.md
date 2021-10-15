@@ -1,8 +1,14 @@
-# Dockerfile templates
+# Docker shell script
 
-Features:
-- Rootless containers.
-- Mount volume for non-root user workdir path.
+Docker shell script to automate common Docker tasks.
+
+## Usage
+
+```console
+$ ./bin/docker.sh --help
+```
+
+Edit the `Variables` section to customize default values.
 
 ## Requirements
 
@@ -10,25 +16,20 @@ Project root directory must contain `.git` repository for Docker shell script to
 
 ## Dockerfiles
 
-Dockerfile templates are located in `./dockerfiles` directory. Dockerfiles have their base image as filename postfix.
+Features:
 
-Copy selected Dockerfile into project root directory and rename it to `Dockerfile.local`.
+- Rootless containers.
+- Mounted volume for working directory.
 
-You can create separate Dockerfiles for different environments specified by Docker shell script.
+Dockerfile templates are located in the `./dockerfiles` directory.
 
-Examples: `Dockerfile.dev`, `Dockerfile.prod`
+Copy selected Dockerfile into project root directory under the name `Dockerfile.local`.
 
-## Docker shell script
+## Environments
 
-Shell script to automate Docker tasks.
+You can create separate Dockerfiles for different runtime environments.
 
-### Usage
+Examples: `Dockerfile.local`, `Dockerfile.dev`, `Dockerfile.prod`
 
-```console
-$ ./bin/docker.sh --help
-```
-
-### Variables
-
-Edit "Variables" section to customize shell script defaults.
+Environments can be specified by the shell script.
 
