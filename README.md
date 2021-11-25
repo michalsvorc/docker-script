@@ -18,8 +18,8 @@ Project root directory must contain `.git` repository for Docker shell script to
 
 Features:
 
-- Rootless containers.
-- Mounted volume for working directory.
+- rootless containers
+- passing additional command arguments allowed
 
 Dockerfile templates are located in the `./dockerfiles` directory.
 
