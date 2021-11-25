@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Author: Michal Svorc <dev@michalsvorc.com>
+# Author: Michal Svorc (https://michalsvorc.com)
 # License: MIT license (https://opensource.org/licenses/MIT)
 # Dependencies: docker, git
 
@@ -17,14 +17,11 @@ set -o pipefail     # Don't hide errors within pipes.
 # Variables
 #===============================================================================
 
-version='1.3.0'
+version='1.4.0'
 argv0=${0##*/}
 
 image_name='templates/docker'
 image_tag_default='latest'
-
-user_name='user'
-work_dir='work'
 
 # Environments
 environment_local='local'
@@ -33,52 +30,53 @@ environment_prod='prod'
 
 environment_default="$environment_local"
 
+# Registry
+registry_host_default='example-registry.com'
+
 # Network
 network='bridge'
-
-# Registries
-registry_uri_default='example-registry.com'
-
-#===============================================================================
-# Usage
-#===============================================================================
-
-usage() {
-  cat <<EOF
-Usage: ${argv0} [options] command
-
-Shell script to automate Docker tasks.
-
-Options:
-    -h, --help            Show help screen and exit.
-
-    -v, --version         Show program version and exit.
-
-    -e, --environment <string>
-                          Specify a value for target environment. Affects
-                          which Dockerfile will be used for the build process.
-                          Available values: local | dev | prod
-                          Defaults to "${environment_default}" when option is not set.
-
-    -t, --tag <string>    Specify an image tag. Environment value will be
-                          appended to the tag as a postfix.
-                          Defaults to "${image_tag_default}-${environment_default}" when option is not set.
-
-Commands:
-    build                 Build an image.
-
-    push [registry_uri]   Push an image to a registry.
-                          Defaults to "${registry_uri_default}"
-                          when no registry URI is provided.
-
-    run                   Create a container and start interactive shell.
-EOF
-  exit ${1:-0}
-}
 
 #===============================================================================
 # Functions
 #===============================================================================
+
+usage() {
+  cat <<EOF
+Shell script to automate Docker tasks.
+
+Usage:
+  ${argv0} [options] build [arguments]
+  ${argv0} [options] run [arguments]
+  ${argv0} [options] push [registry_host]
+
+Options:
+  -h, --help            Show this screen.
+
+  --version             Show version.
+
+  -e, --environment <string>
+                        Specify a value for target environment.
+                        Affects Dockerfile filename and image tag postfix.
+                        Available values: local | dev | prod
+                        Default: ${environment_default}
+
+  -t, --tag <string>    Specify an image tag. Environment value will be
+                        appended to the tag as a postfix.
+                        Default: ${image_tag_default}-${environment_default}
+
+Commands:
+  build                 Build an image.
+
+  run                   Create a container and start interactive shell.
+
+  push                  Tag an image and push it to the registry.
+                        Default: ${registry_host_default}
+
+Arguments:
+  Docker command specific arguments.
+EOF
+  exit ${1:-0}
+}
 
 die() {
   local message="$1"
@@ -108,6 +106,7 @@ docker_build() {
   local image_tag="$1"
   local environment="$2"
   local dockerfile="${3:-Dockerfile}"
+  local rest_args="$4"
 
   local project_root_dir="$(get_project_root_dir)"
   local image_handle="$(
@@ -118,38 +117,36 @@ docker_build() {
     "$image_handle" \
     "$dockerfile"
 
-  docker build \
+  DOCKER_BUILDKIT=1 \
+    docker build \
     --file "${project_root_dir}/${dockerfile}" \
-    --build-arg user_name="$user_name" \
-    --build-arg work_dir="$work_dir" \
     --tag "$image_handle" \
+    ${rest_args} \
     "$project_root_dir"
 }
 
 docker_push() {
   local image_tag="$1"
   local environment="$2"
-  local registry_uri="$3"
+  local registry_host="$3"
 
   local image_handle="$(
     create_image_handle "$image_name" "$image_tag" "$environment"
   )"
 
-  printf 'Pushing image "%s" to registry "%s".\n' \
-    "$image_handle" \
-    "$registry_uri"
+  local registry_uri="${registry_host}/${image_handle}"
+
+  printf 'Pushing "%s".\n' "$registry_uri"
 
   docker image tag \
-    "$image_handle" "${registry_uri}/${image_handle}" \
-    && docker push $_
+    "$image_handle" "$registry_uri" \
+    && docker push "$registry_uri"
 }
 
 docker_run() {
   local image_tag="$1"
   local environment="$2"
-
-  local volume_name="${image_name//[\/:]/-}"
-  local volume_target="/home/${user_name}/${work_dir}"
+  local rest_args="$3"
 
   local image_handle="$(
     create_image_handle "$image_name" "$image_tag" "$environment"
@@ -168,9 +165,9 @@ docker_run() {
 
   docker run \
     -it \
-    --mount "type=volume,source=${volume_name},destination=${volume_target}" \
     --name "$container_name" \
     --network "$network" \
+    ${rest_args} \
     "$image_handle"
 }
 
@@ -185,7 +182,7 @@ while test $# -gt 0 ; do
     -h | --help )
       usage 0
       ;;
-    -v | --version )
+    --version )
       version
       exit 0
       ;;
@@ -193,14 +190,15 @@ while test $# -gt 0 ; do
       shift
       test $# -eq 0 && die 'Missing argument for option "--environment".'
 
-      case "${1:-}" in
+      environment="$1"
+
+      case "${environment:-}" in
         local | dev | prod )
-          environment="$1"
           ;;
         * )
           die "$(
             printf 'Unrecognized value "%s" for option "--environment".' \
-            "${1#-}"
+            "${environment#-}"
           )"
           ;;
       esac
@@ -220,32 +218,35 @@ while test $# -gt 0 ; do
       image_tag="${image_tag:-$image_tag_default}"
       environment="${environment:-$environment_default}"
       dockerfile="Dockerfile.${environment}"
+      rest_args="${@:2}"
 
       docker_build \
         "$image_tag" \
         "$environment" \
-        "$dockerfile"
+        "$dockerfile" \
+        "$rest_args"
       break
       ;;
     push)
-      shift
       image_tag="${image_tag:-$image_tag_default}"
       environment="${environment:-$environment_default}"
-      registry_uri="${1:-$registry_uri_default}"
+      registry_host="${2:-$registry_host_default}"
 
       docker_push \
         "$image_tag" \
         "$environment" \
-        "$registry_uri"
+        "$registry_host"
       break
       ;;
     run)
       image_tag="${image_tag:-$image_tag_default}"
       environment="${environment:-$environment_default}"
+      rest_args="${@:2}"
 
       docker_run \
         "$image_tag" \
-        "$environment"
+        "$environment" \
+        "$rest_args"
       break
       ;;
     * )

@@ -8,47 +8,48 @@ FROM alpine:3.14
 # Build arguments
 #===============================================================================
 
-ARG user_name
-ARG work_dir
+ARG work_dir='work'
 
-ARG group_name=$user_name
-ARG group_id='1000'
+ARG user_name='user'
 ARG user_id='1000'
+
+ARG group_name="${user_name}"
+ARG group_id="${user_id}"
 
 #===============================================================================
 # Update package repositories and install new packages
 #===============================================================================
 
 RUN apk add \
-      --no-cache \
-      --update \
-      bash
+  --no-cache \
+  --update \
+  bash
 
 #===============================================================================
 # Set up a non-root user
 #===============================================================================
 
 RUN addgroup \
-      --gid $group_id \
-      $group_name \
-      && adduser \
-      --uid $user_id \
-      --disabled-password \
-      --ingroup $group_name \
-      $user_name
+  --gid "${group_id}" \
+  "${group_name}" \
+  && adduser \
+  --uid "${user_id}" \
+  --disabled-password \
+  --ingroup "${group_name}" \
+  "${user_name}"
 
 #===============================================================================
 # Set user environment variables
 #===============================================================================
 
 ENV HOME "/home/${user_name}"
-ENV USER $user_name
+ENV USER "${user_name}"
 
 #===============================================================================
 # Set the non-root user
 #===============================================================================
 
-USER $USER
+USER "${USER}"
 
 #===============================================================================
 # Create a working directory

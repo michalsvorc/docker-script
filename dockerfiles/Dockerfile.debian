@@ -8,8 +8,8 @@ FROM debian:bullseye-slim
 # Build arguments
 #===============================================================================
 
-ARG user_name
-ARG work_dir
+ARG work_dir='work'
+ARG user_name='user'
 
 #===============================================================================
 # Update package repositories and install new packages
@@ -32,20 +32,20 @@ RUN useradd \
       --create-home \
       --shell '/bin/bash' \
       --user-group \
-      $user_name
+      "${user_name}"
 
 #===============================================================================
 # Set user environment variables
 #===============================================================================
 
 ENV HOME "/home/${user_name}"
-ENV USER $user_name
+ENV USER "${user_name}"
 
 #===============================================================================
 # Set the non-root user
 #===============================================================================
 
-USER $USER
+USER "${USER}"
 
 #===============================================================================
 # Create a working directory
