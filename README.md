@@ -5,7 +5,7 @@ Docker shell script to automate common Docker tasks.
 Features:
 
 - rootless containers
-- DOCKER_BUILDKIT=1
+- [BuildKit](https://docs.docker.com/develop/develop-images/build_enhancements/)
 
 ## Requirements
 
