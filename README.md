@@ -2,6 +2,9 @@
 
 Docker shell script to automate common Docker tasks.
 
+- rootless containers
+- DOCKER_BUILDKIT=1
+
 ## Requirements
 
 Project root directory must contain `.git/` repository for Docker shell script to work correctly.
@@ -26,6 +29,6 @@ Dockerfile templates are located in the `./dockerfiles/` directory.
 
 You can create separate Dockerfiles for different runtime environments.
 
-Environments can be specified with the shell script `--environment` option.
-
 Examples: `Dockerfile.local`, `Dockerfile.dev`, `Dockerfile.prod`
+
+Environments can be specified with the `--environment <local | dev | prod>` option.
