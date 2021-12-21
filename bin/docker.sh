@@ -17,7 +17,7 @@ set -o pipefail     # Don't hide errors within pipes.
 # Variables
 #===============================================================================
 
-version='1.4.0'
+version='1.5.0'
 argv0=${0##*/}
 
 image_name='templates/docker'
@@ -56,13 +56,16 @@ Options:
 
   -e, --environment <string>
                         Specify a value for target environment.
-                        Affects Dockerfile filename and image tag postfix.
-                        Available values: local | dev | prod
+                        Selects Dockerfile.<environment> in the project root directory.
+                        Available values:
+                          ${environment_local}
+                          ${environment_dev}
+                          ${environment_prod}
                         Default: ${environment_default}
 
-  -t, --tag <string>    Specify an image tag. Environment value will be
-                        appended to the tag as a postfix.
-                        Default: ${image_tag_default}-${environment_default}
+  -t, --tag <string>    Specify an image tag.
+                        Tag will be prefixed with an environment value.
+                        Default: ${environment_default}-${image_tag_default}
 
 Commands:
   build                 Build an image.
@@ -96,10 +99,10 @@ get_project_root_dir() {
 
 create_image_handle() {
   local image_name="$1"
-  local image_tag="$2"
-  local environment="$3"
+  local environment="$2"
+  local image_tag="$3"
 
-  printf '%s:%s-%s' "$image_name" "$image_tag" "$environment"
+  printf '%s:%s-%s' "$image_name" "$environment" "$image_tag"
 }
 
 docker_build() {
@@ -110,7 +113,7 @@ docker_build() {
 
   local project_root_dir="$(get_project_root_dir)"
   local image_handle="$(
-    create_image_handle "$image_name" "$image_tag" "$environment"
+    create_image_handle "$image_name" "$environment" "$image_tag"
   )"
 
   printf 'Building image "%s" from Dockerfile "%s".\n' \
@@ -131,7 +134,7 @@ docker_push() {
   local registry_host="$3"
 
   local image_handle="$(
-    create_image_handle "$image_name" "$image_tag" "$environment"
+    create_image_handle "$image_name" "$environment" "$image_tag"
   )"
 
   local registry_uri="${registry_host}/${image_handle}"
@@ -149,7 +152,7 @@ docker_run() {
   local rest_args="$3"
 
   local image_handle="$(
-    create_image_handle "$image_name" "$image_tag" "$environment"
+    create_image_handle "$image_name" "$environment" "$image_tag"
   )"
   local container_name="$(printf '%s' "${image_handle//[\/:]/-}")"
 
@@ -193,7 +196,7 @@ while test $# -gt 0 ; do
       environment="$1"
 
       case "${environment:-}" in
-        local | dev | prod )
+        "$environment_local" | "$environment_dev" | "$environment_prod" )
           ;;
         * )
           die "$(
