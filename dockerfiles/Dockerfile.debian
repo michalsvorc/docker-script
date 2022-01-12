@@ -9,7 +9,7 @@ FROM debian:bullseye-slim
 #===============================================================================
 
 ARG dir_work='work'
-ARG user_name='user'
+ARG user_name='guest'
 
 #===============================================================================
 # Update package repositories and install new packages

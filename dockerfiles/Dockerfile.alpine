@@ -10,7 +10,7 @@ FROM alpine:3.14
 
 ARG dir_work='work'
 
-ARG user_name='user'
+ARG user_name='guest'
 ARG user_id='1000'
 
 ARG group_name="${user_name}"
